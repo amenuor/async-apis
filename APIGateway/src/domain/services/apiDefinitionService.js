@@ -18,7 +18,7 @@ const apiDefinitionService = (message) => {
       break
     case networkTopology.routingKeyUpsert:
       if (messageParsed.apiId && messageParsed.apiSchemaB64){
-        addApiDefinition(messageParsed.apiId, messageParsed.apiSchemaB64).catch(err => {
+        addApiDefinition(messageParsed.apiId, messageParsed).catch(err => {
           console.error('Adding of API failed.')
           console.error(err)
         })
@@ -35,10 +35,8 @@ const removeApiDefinitionById = (apiId) => {
   return mongodb.deleteApi(apiId)
 }
 
-const addApiDefinition = (apiId, apiSchemaB64) => {
-  return mongodb.storeApi(apiId, apiSchemaB64)
+const addApiDefinition = (apiId, apiDefinition) => {
+  return mongodb.storeApi(apiId, apiDefinition)
 }
 
-module.exports = {
-  apiDefinitionService
-}
+module.exports = apiDefinitionService

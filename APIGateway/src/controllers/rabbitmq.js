@@ -54,11 +54,13 @@ const assertExternalChannelState = () => {
   // Nothing needed for now it seems...
 }
 
-const createExternalCommunicationChannel = (exchangeName, consumer, apiRoutingKeys) => {
+const createExternalCommunicationChannel = (exchangeName, consumer, apiDefinitions) => {
   return rabbitChannelExternal.assertExchange(exchangeName, 'topic', {durable: false, autoDelete: true}).then(() => {
     return rabbitChannelExternal.assertQueue(exchangeName + '_' + serviceName, {durable: false, autoDelete: true}).then(result => {
-      var promises = apiRoutingKeys.map(routingKey => {
-        return rabbitChannelExternal.bindQueue(result.queue, exchangeName, routingKey)
+      var promises = []
+      apiDefinitions.forEach(apiDefinition => {
+        promises.push(rabbitChannelExternal.bindQueue(result.queue, exchangeName, apiDefinition.apiId))
+        promises.push(rabbitChannelExternal.assertExchange(apiDefinition.downstreamExchange, 'topic', {durable: true}))
       })
       promises.push(rabbitChannelExternal.consume(result.queue, consumer))
       return Q.all(promises)

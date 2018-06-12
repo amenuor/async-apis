@@ -49,7 +49,27 @@ const tryGetApi = function(apiId) {
   return d.promise
 }
 
+const getAllApis = () => {
+  if (!currentDBConnection) {
+    throw new Error('Illegal state. Open a connection to the database by invoking openConnection before invoking deleteApi.')
+  }
+  const d = Q.defer()
+
+  apiCollection.find({}).toArray(function (err, docs) {
+    if (err) {
+      d.reject(err)
+    } else {
+      d.resolve(docs)
+    }
+  })
+
+  return d.promise
+}
+
 const deleteApi = (apiId) => {
+  if (!currentDBConnection) {
+    throw new Error('Illegal state. Open a connection to the database by invoking openConnection before invoking deleteApi.')
+  }
   const d = Q.defer()
 
   apiCollection.deleteOne({key: apiId}, function (err, docs) {
@@ -59,7 +79,7 @@ const deleteApi = (apiId) => {
       d.resolve(docs)
     }
   })
-  
+
   return d.promise
 }
 
@@ -88,6 +108,7 @@ const closeConnection = () => {
 module.exports = {
   openConnection,
   tryGetApi,
+  getAllApis,
   storeApi,
   deleteApi,
   closeConnection
