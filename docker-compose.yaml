@@ -1,0 +1,39 @@
+version: '3.2'
+services: 
+  webapp:
+    build: ./WebApp
+    links: 
+      - rabbitmq_ext
+      - apigateway
+  mobileapp:
+    build: ./MobileApp
+    links: 
+      - rabbitmq_ext
+      - apigateway
+  rabbitmq_ext:
+    image: rabbitmq:management-alpine
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+  apigateway:
+    build: ./APIGateway
+    ports: 
+      - 8080:8080
+    links: 
+      - rabbitmq_int
+      - rabbitmq_ext
+  apiportal:
+    build: ./APIPortal
+    links: 
+      - rabbitmq_int
+  rabbitmq_int:
+    image: rabbitmq:management-alpine
+    ports:
+      - "25672:15672"
+      - "6672:5672"
+  microbusiness:
+    build: ./MicroBusiness
+    links:
+      - rabbitmq_int
+  mongodb:
+    image: "mongo"
