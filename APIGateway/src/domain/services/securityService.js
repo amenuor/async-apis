@@ -25,7 +25,7 @@ const securityService = (message) => {
           console.error(err)
         })
       } else {
-        console.error('Received message for handlign logoff but no exchange name was found in the message.')
+        console.error('Received message for handling logoff but no exchange name was found in the message.')
       }
       break
     default:

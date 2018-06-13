@@ -4,14 +4,13 @@ const dbConfig = config.get('apigateway.rabbitmq')
 const Q = require('q')
 const { networkTopology, serviceName } = require('../domain/constants')
 
-let rabbitChannelInternal = null
-let rabbitChannelExternal = null
+let rabbitChannel = {}
 
-const openConnectionHelper = (connectionString, assertChannelFunction) => {
+const openConnectionHelper = (connectionString, assertChannelFunction, channelName) => {
   return amqp.connect(connectionString).then(connection => {
     return connection.createChannel()
   }).then( channel => {
-    rabbitChannelInternal = channel
+    rabbitChannel[channelName] = channel
     return assertChannelFunction()
   }).catch(err => {
     console.error(err)
@@ -29,22 +28,22 @@ const assertInternalChannelState = () => {
 }
 
 const assertAPIDefinitionCommunicationChannel = () => {
-  return rabbitChannelInternal.assertExchange(networkTopology.exchangeAsyncAPIDefinitions, 'topic', {durable: true}).then(() => {
-    return rabbitChannelInternal.assertQueue(networkTopology.queueAsyncAPIDefinitions, {durable: true}).then(result => {
+  return rabbitChannel['internal'].assertExchange(networkTopology.exchangeAsyncAPIDefinitions, 'topic', {durable: true}).then(() => {
+    return rabbitChannel['internal'].assertQueue(networkTopology.queueAsyncAPIDefinitions, {durable: true}).then(result => {
       return Q.all([
-        rabbitChannelInternal.bindQueue(result.queue, networkTopology.exchangeAsyncAPIDefinitions, networkTopology.routingKeyUpsert),
-        rabbitChannelInternal.bindQueue(result.queue, networkTopology.exchangeAsyncAPIDefinitions, networkTopology.routingKeyRemove)
+        rabbitChannel['internal'].bindQueue(result.queue, networkTopology.exchangeAsyncAPIDefinitions, networkTopology.routingKeyUpsert),
+        rabbitChannel['internal'].bindQueue(result.queue, networkTopology.exchangeAsyncAPIDefinitions, networkTopology.routingKeyRemove)
       ])
     })
   })
 }
 
 const assertSecurityEventsChannel = () => {
-  return rabbitChannelInternal.assertExchange(networkTopology.exchangeSecurityEvents, 'topic', {durable: false}).then(() => {
-    return rabbitChannelInternal.assertQueue(networkTopology.queueSecurityEvents, {durable: false}).then(result => {
+  return rabbitChannel['internal'].assertExchange(networkTopology.exchangeSecurityEvents, 'topic', {durable: false}).then(() => {
+    return rabbitChannel['internal'].assertQueue(networkTopology.queueSecurityEvents, {durable: false}).then(result => {
       return Q.all([
-        rabbitChannelInternal.bindQueue(result.queue, networkTopology.exchangeSecurityEvents, networkTopology.routingKeyLogon),
-        rabbitChannelInternal.bindQueue(result.queue, networkTopology.exchangeSecurityEvents, networkTopology.routingKeyLogoff)
+        rabbitChannel['internal'].bindQueue(result.queue, networkTopology.exchangeSecurityEvents, networkTopology.routingKeyLogon),
+        rabbitChannel['internal'].bindQueue(result.queue, networkTopology.exchangeSecurityEvents, networkTopology.routingKeyLogoff)
       ])
     })
   })
@@ -55,60 +54,60 @@ const assertExternalChannelState = () => {
 }
 
 const createExternalCommunicationChannel = (exchangeName, consumer, apiDefinitions) => {
-  return rabbitChannelExternal.assertExchange(exchangeName, 'topic', {durable: false, autoDelete: true}).then(() => {
-    return rabbitChannelExternal.assertQueue(exchangeName + '_' + serviceName, {durable: false, autoDelete: true}).then(result => {
+  return rabbitChannel['external'].assertExchange(exchangeName, 'topic', {durable: false, autoDelete: true}).then(() => {
+    return rabbitChannel['external'].assertQueue(exchangeName + '_' + serviceName, {durable: false, autoDelete: true}).then(result => {
       var promises = []
       apiDefinitions.forEach(apiDefinition => {
-        promises.push(rabbitChannelExternal.bindQueue(result.queue, exchangeName, apiDefinition.apiId))
-        promises.push(rabbitChannelExternal.assertExchange(apiDefinition.downstreamExchange, 'topic', {durable: true}))
+        promises.push(rabbitChannel['external'].bindQueue(result.queue, exchangeName, apiDefinition.apiId))
+        promises.push(rabbitChannel['external'].assertExchange(apiDefinition.downstreamExchange, 'topic', {durable: true}))
       })
-      promises.push(rabbitChannelExternal.consume(result.queue, consumer))
+      promises.push(rabbitChannel['external'].consume(result.queue, consumer))
       return Q.all(promises)
     })
   })
 }
 
 const destroyExternalCommunicationChannel = (exchangeName) => {
-  return rabbitChannelExternal.deleteQueue(exchangeName + '_' + serviceName).then(() => {
-    return rabbitChannelExternal.deleteExchange(exchangeName)
+  return rabbitChannel['external'].deleteQueue(exchangeName + '_' + serviceName).then(() => {
+    return rabbitChannel['external'].deleteExchange(exchangeName)
   })
 }
 
 const publishToExternalExchange = (message, exchangeName, routingKey) => {
-  rabbitChannelExternal.publish(exchangeName, routingKey, Buffer.from(JSON.stringify(message)))
+  rabbitChannel['external'].publish(exchangeName, routingKey, Buffer.from(JSON.stringify(message)))
 }
 
 const setAPIDefinitionConsumer = (consumer) => {
-  return rabbitChannelInternal.consume(networkTopology.queueAsyncAPIDefinitions, consumer)
+  return rabbitChannel['internal'].consume(networkTopology.queueAsyncAPIDefinitions, consumer)
 }
 
 const setSecurityEventConsumer = (consumer) => {
-  return rabbitChannelInternal.consume(networkTopology.queueSecurityEvents, consumer)
+  return rabbitChannel['internal'].consume(networkTopology.queueSecurityEvents, consumer)
 }
 
 const ackInternal = (message) => {
-  rabbitChannelExternal.ack(message)
+  rabbitChannel['external'].ack(message)
 } 
 
 const ackExternal = (message) => {
-  rabbitChannelExternal.ack(message)
+  rabbitChannel['external'].ack(message)
 }
 
 const openConnection = () => {
   return Q.all([
-    openConnectionHelper(dbConfig.connectionStringInternal, assertInternalChannelState),
-    openConnectionHelper(dbConfig.connectionStringExternal, assertExternalChannelState)
+    openConnectionHelper(dbConfig.connectionStringInternal, assertInternalChannelState, 'internal'),
+    openConnectionHelper(dbConfig.connectionStringExternal, assertExternalChannelState, 'external')
   ])
 }
 
 const closeConnection = () => {
-  if (rabbitChannelInternal) {
-    rabbitChannelInternal.close()
-    rabbitChannelInternal = null
+  if (rabbitChannel['internal']) {
+    rabbitChannel['internal'].close()
+    rabbitChannel['internal'] = null
   }
-  if (rabbitChannelExternal) {
-    rabbitChannelExternal.close()
-    rabbitChannelExternal = null
+  if (rabbitChannel['external']) {
+    rabbitChannel['external'].close()
+    rabbitChannel['external'] = null
   }
 }
 

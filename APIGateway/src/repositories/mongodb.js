@@ -6,6 +6,7 @@ const MongoClient = require('mongodb').MongoClient
 const Q = require('q')
 
 const apiCollectionName = 'ApiCollection'
+const apigatewayDatabaseName = 'apiGateway'
 
 let currentDBConnection = null
 let apiCollection = null
@@ -14,9 +15,9 @@ const openConnection = () => {
   // connect to MongoDB
   // Use connect method to connect to the server
   const d = Q.defer()
-  MongoClient.connect(dbConfig.connectionString, function(err, db) {
+  MongoClient.connect(dbConfig.connectionString, function(err, client) {
     if (!err) {
-      currentDBConnection = db
+      currentDBConnection = client.db(apigatewayDatabaseName)
       apiCollection = currentDBConnection.collection(apiCollectionName)
       console.log('Connected to MongoDB at ' + dbConfig.connectionString)
       d.resolve()

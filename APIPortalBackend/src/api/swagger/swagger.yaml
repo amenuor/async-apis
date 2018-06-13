@@ -1,0 +1,120 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: API Portal Backend
+host: localhost:7070
+basePath: /
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /swagger:
+    x-swagger-pipe: swagger_raw
+  /ka:
+    x-swagger-router-controller: keep_alive
+    get:
+      description: If all is fine it returns OK
+      operationId: keepAlive
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/KeepAlive_Response"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/Standard_ErrorResponse"
+  /apis:
+    x-swagger-router-controller: api_definition
+    get:
+      description: Returns a list of API Definitions
+      operationId: getList
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/GetAPIDefinition_Response"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/Standard_ErrorResponse"
+  /apis/{id}:
+    x-swagger-router-controller: api_definition
+    delete:
+      parameters:
+        - name: id
+          in: path
+          type: string
+          required: true
+          description: id
+      description: Remove an API Definition
+      operationId: remove
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/Remove_Response"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/Standard_ErrorResponse"
+    post:
+      parameters:
+        - name: id
+          in: path
+          type: string
+          required: true
+          description: id
+      description: Add or update an API Definition
+      operationId: upsert
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/Upsert_Response"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/Standard_ErrorResponse"
+
+definitions:
+  # Keep Alive
+  KeepAlive_Response:
+    required:
+      - status
+    properties:
+      status:
+        type: string
+  # Remove
+  Remove_Response:
+    required:
+      - status
+    properties:
+      status:
+        type: string
+  # Upsert
+  Upsert_Response:
+    required:
+      - status
+    properties:
+      status:
+        type: string
+  #GetAPIDefinition
+  GetAPIDefinition_Response:
+    required:
+      - apis
+    properties:
+      apis:
+        type: object
+
+  # Shared definitions
+  Standard_ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string

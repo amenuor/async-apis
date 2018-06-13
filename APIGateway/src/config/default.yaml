@@ -40,6 +40,6 @@ apigateway:
   mongodb:
     connectionString: 'mongodb://mongodb/apigateway'
   rabbitmq:
-    connectionStringInternal: 'amqp://rabbitmq_ext'
-    connectionStringExternal: 'amqp://rabbitmq_int'
+    connectionStringInternal: 'amqp://rabbitmq_int'
+    connectionStringExternal: 'amqp://rabbitmq_ext'
     retryInterval: 5000
