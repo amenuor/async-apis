@@ -18,7 +18,7 @@
                 </div>
                 <div class="row">
                   <div class="col-6">
-                    <router-link to="/mainpage"><button type="button" class="btn btn-primary px-4">Login</button></router-link>
+                    <router-link to="/apilist"><button type="button" class="btn btn-primary px-4">Login</button></router-link>
                   </div>
                   <div class="col-6 text-right">
                     <button type="button" class="btn btn-link px-0">Forgot password?</button>

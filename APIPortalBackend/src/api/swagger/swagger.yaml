@@ -69,6 +69,11 @@ paths:
           type: string
           required: true
           description: id
+        - name: newApiDefBody
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/New_API_Def_Request"
       description: Add or update an API Definition
       operationId: upsert
       responses:
@@ -82,6 +87,17 @@ paths:
             $ref: "#/definitions/Standard_ErrorResponse"
 
 definitions:
+  #Create new API Deifintion
+  New_API_Def_Request:
+    required:
+      - apiId
+      - apidef
+    properties:
+      apiId:
+        type: string
+        format: uuid
+      apidef:
+        type: object
   # Keep Alive
   KeepAlive_Response:
     required:

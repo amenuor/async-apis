@@ -24,8 +24,6 @@ services:
       - rabbitmq_ext
   apiportal:
     build: ./APIPortal
-    links: 
-      - apiportalbackend
     ports:
       - "6060:80"
   apiportalbackend:

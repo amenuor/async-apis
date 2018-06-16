@@ -15,7 +15,7 @@ const openConnectionHelper = (connectionString, assertChannelFunction, channelNa
   }).catch(err => {
     console.error(err)
     return new Promise((resolve) => {
-      setTimeout(() => { resolve(openConnectionHelper(connectionString, assertChannelFunction)) }, dbConfig.retryInterval)
+      setTimeout(() => { resolve(openConnectionHelper(connectionString, assertChannelFunction, channelName)) }, dbConfig.retryInterval)
     })
   })
 }
@@ -86,7 +86,7 @@ const setSecurityEventConsumer = (consumer) => {
 }
 
 const ackInternal = (message) => {
-  rabbitChannel['external'].ack(message)
+  rabbitChannel['internal'].ack(message)
 } 
 
 const ackExternal = (message) => {

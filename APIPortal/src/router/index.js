@@ -5,7 +5,8 @@ import Router from 'vue-router'
 import Full from '@/containers/Full'
 
 // Views
-import Mainpage from '@/views/Mainpage'
+import ApiList from '@/views/ApiList'
+import UpsertApi from '@/views/UpsertApi'
 
 // Views - Pages
 import Page404 from '@/views/pages/Page404'
@@ -27,9 +28,19 @@ export default new Router({
       component: Full,
       children: [
         {
-          path: 'mainpage',
-          name: 'Mainpage',
-          component: Mainpage
+          path: 'apilist',
+          name: 'ApiList',
+          component: ApiList
+        },
+        {
+          path: 'editapi/:apiId',
+          name: 'EditApi',
+          component: UpsertApi
+        },
+        {
+          path: 'newapi',
+          name: 'CreateApi',
+          component: UpsertApi
         }
       ]
     },

@@ -1,18 +1,22 @@
 <template>
   <div class="animated fadeIn">
     <div class="row">
-      <api-definition v-for="apidef in apidefs" :apidef="apidef" :key="apidef.id"/>
+      <router-link v-for="apidef in apidefs" :key="apidef.apiId" :to="'/editapi/' + apidef.apiId">
+        <api-definition :apidef="apidef"/>
+      </router-link>
     </div><!--/.row-->
-    <button class="round">+</button>
+    <router-link :to="'/newapi'">
+      <button class="round">+</button>
+    </router-link>
   </div>
 </template>
 
 <script>
-import ApiDefinition from './mainpage/apidef'
+import ApiDefinition from './apiList/apidef'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  name: 'mainpage',
+  name: 'api-list',
   components: {
     ApiDefinition
   },

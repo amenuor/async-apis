@@ -14,17 +14,33 @@ const remove = (request, response) => {
 }
 
 const upsert = (request, response) => {
-  if (request.swagger.params.id.value){
-    mongodb.storeApi(request.swagger.params.id.value, request.body)
+  if (request.swagger.params.id.value && request.swagger.params.newApiDefBody){
+    const requestBody = request.swagger.params.newApiDefBody.raw
+    console.log(requestBody)
+    if (!requestBody.apiId ||
+      !requestBody.apidef ||
+      !requestBody.apidef.metadata ||
+      !requestBody.apidef.metadata.apiId ||
+      !requestBody.apidef.metadata.apiName ||
+      !requestBody.apidef.schemaB64) {
+      response.status(400).end()
+      return;
+    }
+
+    mongodb.storeApi(request.swagger.params.id.value, requestBody.apidef)
+
+    rabbit.publishToAPIDefinitionExchange(requestBody, constants.routingKeyUpsert)
     response.json({message: 'OK'})
-    rabbit.publishToAPIDefinitionExchange({apiId, apiSchemaB64: Buffer.from(JSON.stringify(request.body).toString('base64'))}, constants.routingKeyUpsert)
   } else {
     response.status(400).end()
   }
 }
 
 const getList = (request, response) => {
-  response.json(mongodb.getAllApis())
+  mongodb.getAllApis().then(results => {
+    console.log(results)
+    response.json(results)    
+  })
 }
 
 module.exports = {

@@ -6,7 +6,7 @@
           Team Name
         </li>
         <li class="nav-item">
-          <router-link :to="'/dashboard'" class="nav-link"><i class="icon-speedometer"></i> Dashboard</router-link>
+          <router-link :to="'/apilist'" class="nav-link"><i class="icon-speedometer"></i> Api List</router-link>
         </li>
         <li class="nav-item">
           <router-link :to="'/microservices'" class="nav-link" exact><i class="fa fa-server"></i> Microservices</router-link>

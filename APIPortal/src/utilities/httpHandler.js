@@ -3,7 +3,7 @@ import Q from 'q'
 
 const standardTimeoutMS = 100
 const httpHandler = axios.create({
-  baseURL: 'http://apiportalbackend:7070',
+  baseURL: 'http://localhost:7070',
   timeout: standardTimeoutMS,
   headers: {'Authorization': 'NotInUseYet'}
 })
