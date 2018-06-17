@@ -34,11 +34,15 @@ const securityService = (message) => {
 }
 
 const createExtChannel = (exchangeName) => {
-  var apiDefinitions = mongodb.getAllApis()
-  return rabbitmq.createExternalCommunicationChannel(exchangeName, externalClientService, apiDefinitions)
+  return mongodb.getAllApis().then(apiDefinitions => {
+    return rabbitmq.createExternalCommunicationChannel(exchangeName, externalClientService, apiDefinitions)
+  })
+  .catch(err => {
+    console.error(err)
+  })
 }
 
-const destroyExtChannel = (apiId, apiSchemaB64) => {
+const destroyExtChannel = (exchangeName) => {
   return rabbitmq.destroyExternalCommunicationChannel(exchangeName)
 }
 

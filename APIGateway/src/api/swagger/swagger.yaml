@@ -28,11 +28,83 @@ paths:
           description: Error
           schema:
             $ref: "#/definitions/Standard_ErrorResponse"
-
-
+  /logon:
+    x-swagger-router-controller: security
+    post:
+      description: If all is fine it returns a sessionId
+      operationId: logon
+      parameters:
+        - name: logonBody
+          in: body
+          schema:
+            $ref: "#/definitions/Logon_Request"
+          required: true
+          description: Logon request body
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/Logon_Response"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/Standard_ErrorResponse"
+  /logoff:
+    x-swagger-router-controller: security
+    post:
+      description: If all is fine it destroy the session
+      operationId: logoff
+      parameters:
+        - name: logoffBody
+          in: body
+          schema:
+            $ref: "#/definitions/Logoff_Request"
+          required: true
+          description: Logoff request body
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/Logoff_Response"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/Standard_ErrorResponse"
 definitions:
+  # Logon
+  Logon_Request:
+    required:
+      - userId
+      - password
+    properties:
+      userId:
+        type: string
+      password:
+        type: string
+  # Logoff
+  Logoff_Request:
+    required:
+      - sessionId
+    properties:
+      sessionId:
+        type: string
+
   # Keep Alive
   KeepAlive_Response:
+    required:
+      - status
+    properties:
+      status:
+        type: string
+  # Logon
+  Logon_Response:
+    required:
+      - sessionId
+    properties:
+      sessionId:
+        type: string
+  # Logoff
+  Logoff_Response:
     required:
       - status
     properties:

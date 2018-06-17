@@ -49,6 +49,17 @@ const assertSecurityEventsChannel = () => {
   })
 }
 
+const publishNewLogonEvent = (message) => {
+  // This is used exclusively for the PoC purpose. We are mocking the security backend.
+  rabbitChannel['internal'].publish(networkTopology.exchangeSecurityEvents, networkTopology.routingKeyLogon, Buffer.from(JSON.stringify(message)))
+}
+
+const publishNewLogoffEvent = (message) => {
+  // This is used exclusively for the PoC purpose. We are mocking the security backend.
+  rabbitChannel['internal'].publish(networkTopology.exchangeSecurityEvents, networkTopology.routingKeyLogoff, Buffer.from(JSON.stringify(message)))
+}
+
+
 const assertExternalChannelState = () => {
   // Nothing needed for now it seems...
 }
@@ -120,5 +131,7 @@ module.exports = {
   createExternalCommunicationChannel,
   destroyExternalCommunicationChannel,
   publishToExternalExchange,
-  closeConnection
+  closeConnection,
+  publishNewLogonEvent,
+  publishNewLogoffEvent
 }

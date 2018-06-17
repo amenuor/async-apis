@@ -1,7 +1,7 @@
 <template>
   <div class="animated fadeIn">
-    <div v-if="error">
-      <div class="card card-danger">{{error}}</div>
+    <div v-if="error || localError">
+      <div class="card card-danger">{{error || localError}}</div>
     </div>
     <div v-if="success" class="animated fadeIn">
       <div class="card card-success">{{success}}</div>
@@ -26,6 +26,8 @@
 import JsonEditor from './createApi/jsonEditor'
 import MetadataForm from './createApi/metadataForm'
 import uuidv4 from 'uuid/v4'
+import Q from 'q'
+import Ajv from 'ajv'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
@@ -39,7 +41,9 @@ export default {
       notFound: false,
       apiId: null,
       metadata: null,
-      schema: ''
+      schema: '',
+      localError: null,
+      ajv: new Ajv({ loadSchema: (input) => { return Q.promise(function (resolve) { resolve(input) }) } })
     }
   },
   computed: {
@@ -55,7 +59,34 @@ export default {
       'storeApiDefinition'
     ]),
     store () {
-      this.storeApiDefinition({apiId: this.metadata.apiId, apidef: {metadata: this.metadata, schemaB64: window.btoa(this.schema)}})
+      if (!this.schema) {
+        this.setLocalError('Invalid empty schema.')
+        return
+      }
+      if (!this.isJsonString(this.schema)) {
+        this.setLocalError('Invalid json schema.')
+        return
+      }
+      this.ajv.compileAsync(JSON.parse(this.schema)).then(() => {
+        this.storeApiDefinition({apiId: this.metadata.apiId, apidef: {metadata: this.metadata, schemaB64: window.btoa(this.schema)}})
+      }).catch(err => {
+        this.setLocalError('Invalid schema. ' + err)
+        console.error(err)
+      })
+    },
+    setLocalError (errorMessage) {
+      this.localError = errorMessage
+      window.setTimeout(() => {
+        this.localError = null
+      }, 5000)
+    },
+    isJsonString (str) {
+      try {
+        JSON.parse(str)
+      } catch (e) {
+        return false
+      }
+      return true
     }
   },
   created () {

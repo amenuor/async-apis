@@ -17,6 +17,7 @@
     "express": "^4.16.3",
     "mongodb": "^3.0.10",
     "q": "^1.5.1",
-    "swagger-express-mw": "^0.7.0"
+    "swagger-express-mw": "^0.7.0",
+    "uuid": "^3.2.1"
   }
 }

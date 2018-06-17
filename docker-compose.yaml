@@ -1,19 +1,19 @@
 version: '3.2'
 services: 
-#  webapp:
-#    build: ./WebApp
-#    links: 
-#      - rabbitmq_ext
-#      - apigateway
+  webapp:
+    build: ./WebApp
+    ports:
+      - "5050:80"
 #  mobileapp:
 #    build: ./MobileApp
 #    links: 
 #      - rabbitmq_ext
 #      - apigateway
   rabbitmq_ext:
-    image: rabbitmq:management-alpine
+    build: ./ExtRabbit
     ports:
       - "15672:15672"
+      - "15675:15675"
       - "5672:5672"
   apigateway:
     build: ./APIGateway
@@ -37,9 +37,10 @@ services:
     ports:
       - "25672:15672"
       - "6672:5672"
-#  microbusiness:
-#    build: ./MicroBusiness
-#    links:
-#      - rabbitmq_int
+  microbusiness:
+    build: ./MicroBusiness
+    links:
+      - rabbitmq_int
+      - rabbitmq_ext
   mongodb:
     image: "mongo"

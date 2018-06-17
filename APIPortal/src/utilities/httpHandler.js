@@ -1,7 +1,7 @@
 import axios from 'axios'
 import Q from 'q'
 
-const standardTimeoutMS = 100
+const standardTimeoutMS = 1000
 const httpHandler = axios.create({
   baseURL: 'http://localhost:7070',
   timeout: standardTimeoutMS,
