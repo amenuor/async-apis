@@ -9,7 +9,6 @@ const startService = () => {
 
     if (clients.length > 0) {
       clients.forEach(routingKey => {
-        console.log(routingKey)
         rabbit.publishToClient({businessData}, routingKey)
       })
     }
