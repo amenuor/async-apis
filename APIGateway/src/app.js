@@ -8,7 +8,7 @@ const SwaggerExpress = require('swagger-express-mw')
 const app = require('express')()
 const Q = require('q')
 const port = process.env.PORT || 8080
-const apiDefinitionService = require('./domain/services/apiDefinitionService')
+const { apiDefinitionService } = require('./domain/services/apiDefinitionService')
 const securityService = require('./domain/services/securityService')
 
 const config = {

@@ -11,6 +11,6 @@ module.exports = {
     routingKeyLogon: 'logon',
     routingKeyLogoff: 'logoff',
 
-    exchangeExternalClient: 'ExternalClient_'
+    exchangeExternalClient: 'amq.topic'
   }
 }

@@ -1,14 +1,5 @@
 version: '3.2'
 services: 
-  webapp:
-    build: ./WebApp
-    ports:
-      - "5050:80"
-#  mobileapp:
-#    build: ./MobileApp
-#    links: 
-#      - rabbitmq_ext
-#      - apigateway
   rabbitmq_ext:
     build: ./ExtRabbit
     ports:
@@ -22,10 +13,6 @@ services:
     links: 
       - rabbitmq_int
       - rabbitmq_ext
-  apiportal:
-    build: ./APIPortal
-    ports:
-      - "6060:80"
   apiportalbackend:
     build: ./APIPortalBackend
     links: 

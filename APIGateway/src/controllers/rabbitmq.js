@@ -61,20 +61,20 @@ const publishNewLogoffEvent = (message) => {
 
 
 const assertExternalChannelState = () => {
-  // Nothing needed for now it seems...
+  return rabbitChannel['external'].assertExchange(networkTopology.exchangeExternalClient, 'topic', {durable: true})
 }
 
-const createExternalCommunicationChannel = (exchangeName, consumer, apiDefinitions) => {
-  return rabbitChannel['external'].assertExchange(exchangeName, 'topic', {durable: false, autoDelete: true}).then(() => {
-    return rabbitChannel['external'].assertQueue(exchangeName + '_' + serviceName, {durable: false, autoDelete: true}).then(result => {
-      var promises = []
-      apiDefinitions.forEach(apiDefinition => {
-        promises.push(rabbitChannel['external'].bindQueue(result.queue, exchangeName, apiDefinition.apiId))
+const createExternalCommunicationChannel = (routingKey, consumer, apiDefinitions) => {
+  return rabbitChannel['external'].assertQueue('amq_topic_' + routingKey + '_' + serviceName, {durable: false, autoDelete: true}).then(result => {
+    var promises = []
+    promises.push(rabbitChannel['external'].bindQueue(result.queue, networkTopology.exchangeExternalClient, routingKey + '_clientEvents'))
+    apiDefinitions.forEach(apiDefinition => {
+      if (apiDefinition.downstreamExchange) {
         promises.push(rabbitChannel['external'].assertExchange(apiDefinition.downstreamExchange, 'topic', {durable: true}))
-      })
-      promises.push(rabbitChannel['external'].consume(result.queue, consumer))
-      return Q.all(promises)
+      }
     })
+    promises.push(rabbitChannel['external'].consume(result.queue, consumer))
+    return Q.all(promises)
   })
 }
 

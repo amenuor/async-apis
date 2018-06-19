@@ -1,5 +1,7 @@
 <template>
   <div class='hello'>
+    <button @click="publishEvent">Publish Event</button>
+    <input type="text" class="form-control" v-model="apiId"/>
     <ul id="example-1">
       <li v-for="message in messages" :key="message">
         {{ message }}
@@ -14,7 +16,8 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      messages: []
+      messages: [],
+      apiId: ''
     }
   },
   mounted () {
@@ -53,6 +56,12 @@ export default {
     onMessageArrived (message) {
       this.messages.push(JSON.parse(message.payloadString).businessData)
       console.log('onMessageArrived:' + message.payloadString)
+    },
+
+    publishEvent () {
+      const message = new window.Paho.MQTT.Message(JSON.stringify({apiId: this.apiId, socketTimeout: 200}))
+      message.topic = this.$route.params.sessionId + '_clientEvents'
+      this.client.publish(message)
     }
   }
 }
